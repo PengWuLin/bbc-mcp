@@ -1,0 +1,27 @@
+Server:
+  Name: bbc-mcp
+  Host: 0.0.0.0
+  Port: 9000
+
+Database:
+  Host: 192.168.31.200
+  Port: 3306
+  Name: scloudb
+  User: root
+  Password: ".pwl123456"
+  MaxOpenConns: 10
+  MaxIdleConns: 5
+
+Redis:
+  Host: 192.168.31.200
+  Port: 6379
+  Password: ""
+  DB: 0
+
+BbcTool:
+  Path: /app/bbc-tool
+  Timeout: 30
+
+Auth:
+  Tokens:
+    - "mf8KPh6f5ma8RhOkIeYYVCK15jtAg4CLUTTlkGHc"

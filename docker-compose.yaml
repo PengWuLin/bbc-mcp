@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bbc-mcp:latest
+    container_name: bbc-mcp-app
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./etc/bbc-mcp-docker.yaml:/app/etc/bbc-mcp.yaml:ro
+    environment:
+      BBC_MCP_CONFIG: /app/etc/bbc-mcp.yaml
+    networks:
+      - bbc-mcp-net
+
+networks:
+  bbc-mcp-net:
+    driver: bridge

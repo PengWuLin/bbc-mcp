@@ -9,7 +9,7 @@ DOCKER_IMG := $(APP_NAME):$(VERSION)
 CONFIG     := etc/$(APP_NAME).yaml
 OUTDIR     := bin
 
-.PHONY: build build-linux run test docker-build docker-run docker-stop clean docker-clean
+.PHONY: build build-linux run test docker-build docker-run docker-stop docker-up docker-down docker-logs clean docker-clean
 
 # ---- build ----
 
@@ -57,3 +57,14 @@ clean:
 
 docker-clean:
 	-$(DOCKER) rmi $(DOCKER_IMG)
+
+# ---- docker-compose ----
+
+docker-up:
+	$(DOCKER) compose up -d
+
+docker-down:
+	$(DOCKER) compose down
+
+docker-logs:
+	$(DOCKER) compose logs -f
