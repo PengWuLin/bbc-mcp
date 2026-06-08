@@ -4,14 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
+	"bbc-mcp/internal/auth"
 	"bbc-mcp/internal/config"
 	"bbc-mcp/internal/infrastructure"
+	"bbc-mcp/internal/ratelimit"
 	"bbc-mcp/internal/tool"
 )
 
@@ -20,11 +24,12 @@ type BBCMCPServer struct {
 	deps   *tool.Dependencies
 }
 
-func NewBBCMCPServer(deps *tool.Dependencies) *BBCMCPServer {
+func NewBBCMCPServer(deps *tool.Dependencies, hooks *server.Hooks) *BBCMCPServer {
 	s := server.NewMCPServer(
 		"bbc-mcp",
 		"1.0.0",
 		server.WithToolCapabilities(true),
+		server.WithHooks(hooks),
 	)
 	tool.RegisterAll(s, deps)
 	return &BBCMCPServer{server: s, deps: deps}
@@ -39,6 +44,27 @@ func (s *BBCMCPServer) ServeSSE(addr string) *server.SSEServer {
 		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
 		server.WithUseFullURLForMessageEndpoint(false),
 	)
+}
+
+func createRateLimitHooks(rl *ratelimit.RateLimiter) *server.Hooks {
+	hooks := &server.Hooks{}
+
+	hooks.AddOnRequestInitialization(func(ctx context.Context, id any, message any) error {
+		if !rl.TryAcquire() {
+			return ratelimit.ErrRateLimitExceeded
+		}
+		return nil
+	})
+
+	hooks.AddOnSuccess(func(ctx context.Context, id any, method mcp.MCPMethod, message any, result any) {
+		rl.Release()
+	})
+
+	hooks.AddOnError(func(ctx context.Context, id any, method mcp.MCPMethod, message any, err error) {
+		rl.Release()
+	})
+
+	return hooks
 }
 
 func main() {
@@ -70,22 +96,41 @@ func main() {
 		Config: cfg,
 	}
 
-	bbcServer := NewBBCMCPServer(deps)
+	rateLimiter := ratelimit.NewRateLimiter()
+	hooks := createRateLimitHooks(rateLimiter)
+
+	bbcServer := NewBBCMCPServer(deps, hooks)
 
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	sseServer := bbcServer.ServeSSE(addr)
 
-	// 优雅关闭
+	authMiddleware := auth.NewAuthMiddleware(cfg.Auth.Tokens)
+
+	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if err := authMiddleware.Validate(authHeader); err != nil {
+			log.Printf("auth: 认证失败: %v (from %s)", err, r.RemoteAddr)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		sseServer.ServeHTTP(w, r)
+	})
+
+	httpServer := &http.Server{
+		Addr:    addr,
+		Handler: wrappedHandler,
+	}
+
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigCh
 		log.Printf("收到信号 %v，正在关闭服务...", sig)
-		sseServer.Shutdown(context.Background())
+		httpServer.Shutdown(context.Background())
 	}()
 
 	log.Printf("bbc-mcp SSE server 启动于 %s", addr)
-	if err := sseServer.Start(addr); err != nil {
+	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("服务启动失败: %v", err)
 	}
 }

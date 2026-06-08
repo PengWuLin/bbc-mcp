@@ -21,3 +21,7 @@ Redis:
 BbcTool:
   Path: D:\github\bbc-tool\cmd\bbc-tool\bbc-tool.exe
   Timeout: 30
+
+Auth:
+  Tokens:
+    - "mf8KPh6f5ma8RhOkIeYYVCK15jtAg4CLUTTlkGHc"

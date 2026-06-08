@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig `yaml:"Database"`
 	Redis    RedisConfig    `yaml:"Redis"`
 	BbcTool  BbcToolConfig  `yaml:"BbcTool"`
+	Auth     AuthConfig     `yaml:"Auth"`
 }
 
 type ServerConfig struct {
@@ -40,6 +41,10 @@ type RedisConfig struct {
 type BbcToolConfig struct {
 	Path    string `yaml:"Path"`
 	Timeout int    `yaml:"Timeout"`
+}
+
+type AuthConfig struct {
+	Tokens []string `yaml:"Tokens"`
 }
 
 func Load(path string) (*Config, error) {

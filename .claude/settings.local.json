@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build *)",
+      "Bash(go doc *)",
+      "Bash(go run *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)",
+      "Bash(go mod *)",
+      "Bash(go env *)",
+      "Bash(xargs -I{} ls -la {}/github.com/mark3labs/mcp-go@*/client/)",
+      "Bash(go list *)",
+      "Bash(curl -v -N http://192.168.31.67:9000/sse)",
+      "Bash(curl -s -N http://192.168.31.67:9000/sse)",
+      "Bash(./client.exe *)",
+      "Bash(go vet *)"
+    ]
+  }
+}

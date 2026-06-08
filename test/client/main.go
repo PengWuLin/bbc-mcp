@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/mark3labs/mcp-go/client"
+	"github.com/mark3labs/mcp-go/client/transport"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -17,10 +20,14 @@ func main() {
 	if v := os.Getenv("BBC_MCP_SERVER_URL"); v != "" {
 		serverURL = v
 	}
+	token := os.Getenv("BBC_MCP_TOKEN")
+	if token == "" {
+		token = "mf8KPh6f5ma8RhOkIeYYVCK15jtAg4CLUTTlkGHc"
+	}
 
 	ctx := context.Background()
 
-	cli, err := client.NewSSEMCPClient(serverURL + "/sse")
+	cli, err := newSSEClient(ctx, serverURL, token)
 	if err != nil {
 		log.Fatalf("创建 SSE MCP 客户端失败: %v", err)
 	}
@@ -48,7 +55,6 @@ func main() {
 	fmt.Printf("Connected to server: %s v%s\n", initResult.ServerInfo.Name, initResult.ServerInfo.Version)
 	fmt.Printf("Protocol version: %s\n\n", initResult.ProtocolVersion)
 
-	// 列出所有可用 Tools
 	tools, err := cli.ListTools(ctx, mcp.ListToolsRequest{})
 	if err != nil {
 		log.Fatalf("列出 Tools 失败: %v", err)
@@ -60,21 +66,126 @@ func main() {
 	}
 	fmt.Println()
 
-	// 测试 gateway_status
 	fmt.Println("=== 测试 gateway_status ===")
 	testGatewayStatus(ctx, cli)
 	fmt.Println()
 
-	// 测试 device_list
 	fmt.Println("=== 测试 device_list ===")
-	testDeviceList(ctx, cli, "56626662", "", 0)        // 不带 name
-	testDeviceList(ctx, cli, "56626662", "Connect", 0) // 带 name 模糊搜索
+	testDeviceList(ctx, cli, "56626662", "", 0)
+	testDeviceList(ctx, cli, "56626662", "Connect", 0)
 	fmt.Println()
 
-	// 测试 device_status
 	fmt.Println("=== 测试 device_status ===")
 	testDeviceStatus(ctx, cli, 223166)
 	fmt.Println()
+
+	if os.Getenv("BBC_MCP_TEST_RATELIMIT") == "1" {
+		testRateLimit(serverURL, token)
+	}
+	if os.Getenv("BBC_MCP_TEST_AUTH") == "1" {
+		testAuth(serverURL, token)
+	}
+}
+
+func newSSEClient(_ context.Context, serverURL, token string) (*client.Client, error) {
+	return client.NewSSEMCPClient(serverURL+"/sse",
+		client.WithHeaders(map[string]string{
+			"Authorization": "Bearer " + token,
+		}),
+	)
+}
+
+func testRateLimit(serverURL, token string) {
+	fmt.Println("=== 测试限流 ===")
+	var wg sync.WaitGroup
+	results := make(chan string, 2)
+
+	for i := range 2 {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			cli, err := newSSEClient(context.Background(), serverURL, token)
+			if err != nil {
+				results <- fmt.Sprintf("goroutine %d: 创建客户端失败: %v", idx, err)
+				return
+			}
+			defer cli.Close()
+
+			if err := cli.Start(context.Background()); err != nil {
+				results <- fmt.Sprintf("goroutine %d: 启动失败: %v", idx, err)
+				return
+			}
+
+			time.Sleep(time.Duration(idx*100) * time.Millisecond)
+
+			_, err = cli.CallTool(context.Background(), mcp.CallToolRequest{
+				Params: mcp.CallToolParams{
+					Name: "gateway_status",
+				},
+			})
+			if err != nil {
+				results <- fmt.Sprintf("goroutine %d: 调用失败 (限流生效): %v", idx, err)
+			} else {
+				results <- fmt.Sprintf("goroutine %d: 调用成功", idx)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	close(results)
+	for r := range results {
+		fmt.Println(r)
+	}
+}
+
+func testAuth(serverURL, token string) {
+	fmt.Println("=== 测试认证 ===")
+
+	tests := []struct {
+		name   string
+		header string
+	}{
+		{"无 Authorization 头", ""},
+		{"格式错误的 Authorization", "InvalidFormat token123"},
+		{"无效 token", "Bearer invalid-token"},
+	}
+
+	for _, tt := range tests {
+		fmt.Printf("测试: %s\n", tt.name)
+		opts := []transport.ClientOption{}
+		if tt.header != "" {
+			opts = append(opts, client.WithHeaders(map[string]string{
+				"Authorization": tt.header,
+			}))
+		}
+
+		cli, err := client.NewSSEMCPClient(serverURL+"/sse", opts...)
+		if err != nil {
+			fmt.Printf("  创建客户端失败: %v\n", err)
+			continue
+		}
+
+		err = cli.Start(context.Background())
+		if err != nil {
+			fmt.Printf("  连接失败 (预期): %v\n", err)
+			continue
+		}
+		cli.Close()
+		fmt.Printf("  连接成功 (未预期)\n")
+	}
+
+	fmt.Printf("测试: 有效 token\n")
+	cli, err := newSSEClient(context.Background(), serverURL, token)
+	if err != nil {
+		fmt.Printf("  创建客户端失败: %v\n", err)
+		return
+	}
+	if err := cli.Start(context.Background()); err != nil {
+		fmt.Printf("  连接失败: %v\n", err)
+		return
+	}
+	defer cli.Close()
+	fmt.Printf("  连接成功\n")
 }
 
 func testGatewayStatus(ctx context.Context, cli *client.Client) {
@@ -87,7 +198,6 @@ func testGatewayStatus(ctx context.Context, cli *client.Client) {
 		log.Printf("gateway_status 调用失败: %v", err)
 		return
 	}
-
 	printResult(result)
 }
 
