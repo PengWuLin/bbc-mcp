@@ -1,0 +1,13 @@
+.git
+.gitignore
+.idea
+.vscode
+.claude
+*.md
+docs/
+example/
+test/
+bin/
+Dockerfile
+Makefile
+.dockerignore

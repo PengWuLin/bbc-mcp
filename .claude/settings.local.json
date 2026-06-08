@@ -13,7 +13,8 @@
       "Bash(curl -v -N http://192.168.31.67:9000/sse)",
       "Bash(curl -s -N http://192.168.31.67:9000/sse)",
       "Bash(./client.exe *)",
-      "Bash(go vet *)"
+      "Bash(go vet *)",
+      "Bash(make build *)"
     ]
   }
 }
