@@ -2,7 +2,6 @@ package tool
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os/exec"
 	"time"
@@ -26,7 +25,8 @@ func newGatewayStatus(deps *Dependencies) ToolDefinition {
 			output, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Printf("gateway_status: 执行命令失败: %v", err)
-				return mcp.NewToolResultError(fmt.Sprintf("执行 bbc-tool 失败: %v", err)), nil
+				return mcp.NewToolResultText(string(output)), nil
+				// return mcp.NewToolResultError(fmt.Sprintf("执行 bbc-tool 失败: %v", err)), nil
 			}
 
 			return mcp.NewToolResultText(string(output)), nil

@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	serverURL := "http://127.0.0.1:9000"
+	serverURL := "http://192.168.31.67:9000"
 	if v := os.Getenv("BBC_MCP_SERVER_URL"); v != "" {
 		serverURL = v
 	}

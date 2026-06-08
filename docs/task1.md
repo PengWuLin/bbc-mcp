@@ -200,3 +200,91 @@ hgetall device:223166:status:basic
 1) "status"
 2) "3"
 ```
+
+## 测试数据库
+```sql
+INSERT INTO `device` (
+    `id`, `gwid`, `ccode`, `type`, `name`, `pwd`, `model`, `is_nfv`,
+    `prod_line`, `prod_name`, `version`, `is_custom`, `active_time`,
+    `lst_online_time`, `lst_offline_time`, `status`, `ip`, `mac`,
+    `eth0_mac`, `zp_id`, `branch_id`, `parent_id`, `tpl_id`, `license`,
+    `device_belong`, `create_source`, `update_source`, `last_update_time`,
+    `desc`, `sn`, `region_id`, `tags`, `platforms`, `addr`, `order_id`,
+    `org_id`, `alias`, `manager`, `email`, `remark`, `conn_code`,
+    `conn_code_gen_time`, `add_type`, `create_time`, `vid`
+) VALUES (
+    223166,
+    '2WNPEKJG',
+    '56626662',
+    3,
+    'pwl.af.simulator.china',
+    'r2P+6j9vmRiY6Cr+',
+    NULL,
+    1,
+    NULL,
+    'AF',
+    NULL,
+    NULL,
+    '2026-04-09 14:10:54',
+    '2026-06-06 22:17:08',
+    '2026-06-06 20:39:19',
+    1,
+    NULL,
+    NULL,
+    NULL,
+    8001,
+    217995,
+    -1,
+    -1,
+    NULL,
+    3,
+    3,
+    3,
+    '2026-06-06 22:17:06',
+    NULL,
+    '',
+    1190308,
+    NULL,
+    'xcentral,sase',
+    '',
+    '',
+    0,
+    'pwl.af.simulator.china',
+    '',
+    '',
+    '',
+    '',
+    '2026-04-08 10:18:53',
+    0,
+    '2026-04-08 10:18:53',
+    ''
+);
+```
+
+
+```sql
+HSET device_223166 status 3
+```
+
+```sql
+HSET device:223166:status:basic \
+  product_name "AF" \
+  tenant "56626662" \
+  "bbc:heartbeat" "31693" \
+  zp_id "8001" \
+  bandwidth "0" \
+  send "1866" \
+  mem "41" \
+  device_id "223166" \
+  last_online_time "2026-06-05-17:56:07" \
+  minibbc "true:2026-06-05-17:56:07" \
+  disk "64" \
+  session_num "20" \
+  recv "1128" \
+  vm_num "0" \
+  gateway_id "2WNPEKJG" \
+  cpu "98" \
+  user "10" \
+  version "8.0.7" \
+  last_offline_time "2026-05-14-16:41:11"
+```
