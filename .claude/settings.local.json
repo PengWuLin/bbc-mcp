@@ -19,7 +19,9 @@
       "Bash(export BBC_MCP_KEY=\"bbc-mcp-master-key-2026\")",
       "Bash(bin/encrypt-tool.exe encrypt *)",
       "Bash(go get *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(./bin/encrypt-tool genkey *)",
+      "Bash(BBC_MCP_KEY=790adeff10b48e1397c6cbbce28361f76705656caa571766cdd375158cdba87a ./bin/encrypt-tool encrypt *)"
     ]
   }
 }

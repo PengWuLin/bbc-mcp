@@ -85,8 +85,8 @@ func Load(path string) (*Config, error) {
 
 	cfg.applyDefaults()
 
-	if err := cfg.decryptPasswords(); err != nil {
-		log.Printf("config: 解密密码失败: %v", err)
+	if err := cfg.decryptSecrets(); err != nil {
+		log.Printf("config: 解密敏感数据失败: %v", err)
 		return nil, err
 	}
 
@@ -111,7 +111,7 @@ func (c *Config) applyDefaults() {
 	}
 }
 
-func (c *Config) decryptPasswords() error {
+func (c *Config) decryptSecrets() error {
 	if c.Database.Password != "" {
 		pw, err := crypto.DecryptIfNeeded(c.Database.Password)
 		if err != nil {
@@ -126,5 +126,27 @@ func (c *Config) decryptPasswords() error {
 		}
 		c.Redis.Password = pw
 	}
+
+	for i, token := range c.Auth.Tokens {
+		if token != "" {
+			decrypted, err := crypto.DecryptIfNeeded(token)
+			if err != nil {
+				return fmt.Errorf("解密 Auth.Tokens[%d] 失败: %w", i, err)
+			}
+			c.Auth.Tokens[i] = decrypted
+		}
+	}
+
+	for name, cluster := range c.K8sClusters {
+		if cluster.Token != "" {
+			decrypted, err := crypto.DecryptIfNeeded(cluster.Token)
+			if err != nil {
+				return fmt.Errorf("解密 K8sClusters.%s.Token 失败: %w", name, err)
+			}
+			cluster.Token = decrypted
+			c.K8sClusters[name] = cluster
+		}
+	}
+
 	return nil
 }
