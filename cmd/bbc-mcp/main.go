@@ -15,6 +15,7 @@ import (
 	"bbc-mcp/internal/auth"
 	"bbc-mcp/internal/config"
 	"bbc-mcp/internal/infrastructure"
+	"bbc-mcp/internal/k8s"
 	"bbc-mcp/internal/ratelimit"
 	"bbc-mcp/internal/tool"
 )
@@ -78,6 +79,18 @@ func main() {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
+	k8sClients := make(map[string]*k8s.Client)
+	if cfg.Gateway.Mode == "native" {
+		for name, clusterCfg := range cfg.K8sClusters {
+			client, err := k8s.NewClient(name, clusterCfg.Server, clusterCfg.Token, clusterCfg.CAData, clusterCfg.Insecure)
+			if err != nil {
+				log.Fatalf("初始化 K8s 客户端 %s 失败: %v", name, err)
+			}
+			k8sClients[name] = client
+			log.Printf("K8s 客户端 %s 初始化成功", name)
+		}
+	}
+
 	db, err := infrastructure.NewMySQLDataSource(&cfg.Database)
 	if err != nil {
 		log.Fatalf("初始化 MySQL 失败: %v", err)
@@ -91,9 +104,10 @@ func main() {
 	defer redisClient.Close()
 
 	deps := &tool.Dependencies{
-		DB:     db,
-		Redis:  redisClient,
-		Config: cfg,
+		DB:         db,
+		Redis:      redisClient,
+		Config:     cfg,
+		K8sClients: k8sClients,
 	}
 
 	rateLimiter := ratelimit.NewRateLimiter()

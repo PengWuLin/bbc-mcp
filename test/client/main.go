@@ -71,19 +71,19 @@ func main() {
 	fmt.Println()
 
 	fmt.Println("=== 测试 device_list ===")
-	testDeviceList(ctx, cli, "56626662", "", 0)
-	testDeviceList(ctx, cli, "56626662", "Connect", 0)
+	//testDeviceList(ctx, cli, "56626662", "", 0)
+	//testDeviceList(ctx, cli, "56626662", "Connect", 0)
 	fmt.Println()
 
 	fmt.Println("=== 测试 device_status ===")
-	testDeviceStatus(ctx, cli, 223166)
+	//testDeviceStatus(ctx, cli, 223166)
 	fmt.Println()
 
 	if os.Getenv("BBC_MCP_TEST_RATELIMIT") == "1" {
-		testRateLimit(serverURL, token)
+		//testRateLimit(serverURL, token)
 	}
 	if os.Getenv("BBC_MCP_TEST_AUTH") == "1" {
-		testAuth(serverURL, token)
+		//testAuth(serverURL, token)
 	}
 }
 

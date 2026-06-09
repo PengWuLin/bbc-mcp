@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"bbc-mcp/internal/config"
+	"bbc-mcp/internal/k8s"
 )
 
 type ToolDefinition struct {
@@ -17,9 +18,10 @@ type ToolDefinition struct {
 }
 
 type Dependencies struct {
-	DB     *sql.DB
-	Redis  *redis.Client
-	Config *config.Config
+	DB         *sql.DB
+	Redis      *redis.Client
+	Config     *config.Config
+	K8sClients map[string]*k8s.Client
 }
 
 func RegisterAll(s *server.MCPServer, deps *Dependencies) {

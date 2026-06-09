@@ -2,13 +2,14 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
 var (
-	ErrMissingAuth      = errors.New("缺少认证信息")
+	ErrMissingAuth       = errors.New("缺少认证信息")
 	ErrInvalidAuthFormat = errors.New("认证格式错误，应为: Bearer <token>")
-	ErrInvalidToken     = errors.New("无效的认证令牌")
+	ErrInvalidToken      = errors.New("无效的认证令牌")
 )
 
 type AuthMiddleware struct {
@@ -19,7 +20,9 @@ func NewAuthMiddleware(tokens []string) *AuthMiddleware {
 	m := make(map[string]bool)
 	for _, t := range tokens {
 		m[t] = true
+		fmt.Printf("token : %v \n", t)
 	}
+
 	return &AuthMiddleware{tokens: m}
 }
 
@@ -33,6 +36,8 @@ func (a *AuthMiddleware) Validate(authHeader string) error {
 	}
 	token := parts[1]
 	if !a.tokens[token] {
+		fmt.Printf("authHeader : %v \n", authHeader)
+		fmt.Printf("parts : %v \n", parts)
 		return ErrInvalidToken
 	}
 	return nil

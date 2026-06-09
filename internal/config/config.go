@@ -11,11 +11,13 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig   `yaml:"Server"`
-	Database DatabaseConfig `yaml:"Database"`
-	Redis    RedisConfig    `yaml:"Redis"`
-	BbcTool  BbcToolConfig  `yaml:"BbcTool"`
-	Auth     AuthConfig     `yaml:"Auth"`
+	Server      ServerConfig              `yaml:"Server"`
+	Database    DatabaseConfig            `yaml:"Database"`
+	Redis       RedisConfig               `yaml:"Redis"`
+	BbcTool     BbcToolConfig             `yaml:"BbcTool"`
+	Auth        AuthConfig                `yaml:"Auth"`
+	Gateway     GatewayConfig             `yaml:"Gateway"`
+	K8sClusters map[string]K8sClusterConfig `yaml:"K8sClusters"`
 }
 
 type ServerConfig struct {
@@ -50,6 +52,25 @@ type AuthConfig struct {
 	Tokens []string `yaml:"Tokens"`
 }
 
+type GatewayConfig struct {
+	Mode   string              `yaml:"Mode"`
+	Native GatewayNativeConfig `yaml:"Native"`
+}
+
+type GatewayNativeConfig struct {
+	Namespace   string `yaml:"Namespace"`
+	StatefulSet string `yaml:"StatefulSet"`
+	Container   string `yaml:"Container"`
+	Port        int    `yaml:"Port"`
+}
+
+type K8sClusterConfig struct {
+	Server   string `yaml:"Server"`   // K8s API server URL, e.g. https://192.168.1.100:6443
+	Token    string `yaml:"Token"`    // Bearer token
+	CAData   string `yaml:"CAData"`   // CA certificate (base64, optional)
+	Insecure bool   `yaml:"Insecure"` // Skip TLS verification
+}
+
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -62,12 +83,32 @@ func Load(path string) (*Config, error) {
 		return nil, err
 	}
 
+	cfg.applyDefaults()
+
 	if err := cfg.decryptPasswords(); err != nil {
 		log.Printf("config: 解密密码失败: %v", err)
 		return nil, err
 	}
 
 	return cfg, nil
+}
+
+func (c *Config) applyDefaults() {
+	if c.Gateway.Mode == "" {
+		c.Gateway.Mode = "cli"
+	}
+	if c.Gateway.Native.Namespace == "" {
+		c.Gateway.Native.Namespace = "xcentral"
+	}
+	if c.Gateway.Native.StatefulSet == "" {
+		c.Gateway.Native.StatefulSet = "cloudbbc-gateway"
+	}
+	if c.Gateway.Native.Container == "" {
+		c.Gateway.Native.Container = "cloudbbc-goproxy-container"
+	}
+	if c.Gateway.Native.Port == 0 {
+		c.Gateway.Native.Port = 5000
+	}
 }
 
 func (c *Config) decryptPasswords() error {
