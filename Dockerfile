@@ -23,6 +23,8 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /build/bbc-mcp .
 
+
+
 EXPOSE 9000
 
 ENTRYPOINT ["./bbc-mcp"]

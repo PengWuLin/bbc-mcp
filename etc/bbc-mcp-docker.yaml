@@ -4,22 +4,22 @@ Server:
   Port: 9000
 
 Database:
-  Host: 192.168.31.200
+  Host: 10.224.0.5
   Port: 3306
   Name: scloudb
   User: root
-  Password: ".pwl123456"
+  Password: "YkRPTXf6EIChMOvz"
   MaxOpenConns: 10
   MaxIdleConns: 5
 
 Redis:
-  Host: 192.168.31.200
+  Host: 10.22.132.24
   Port: 6379
-  Password: ""
+  Password: "ZusM6vrjqKV6tOlF@"
   DB: 0
 
 BbcTool:
-  Path: /app/bbc-tool
+  Path: /app/tools/bbc-tool
   Timeout: 30
 
 Auth:

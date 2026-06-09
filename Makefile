@@ -1,5 +1,5 @@
 APP_NAME    := bbc-mcp
-VERSION    ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+VERSION    ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "latest")
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 LDFLAGS    := -s -w -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME)
 

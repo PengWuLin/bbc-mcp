@@ -24,7 +24,7 @@ func newGatewayStatus(deps *Dependencies) ToolDefinition {
 			cmd := exec.CommandContext(cmdCtx, toolPath, "status", "gateway")
 			output, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Printf("gateway_status: 执行命令失败: %v", err)
+				log.Printf("gateway_status: 执行命令失败，输出：%s，错误： %v", output, err)
 				return mcp.NewToolResultText(string(output)), nil
 				// return mcp.NewToolResultError(fmt.Sprintf("执行 bbc-tool 失败: %v", err)), nil
 			}
