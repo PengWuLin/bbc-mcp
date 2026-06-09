@@ -20,7 +20,6 @@ func NewAuthMiddleware(tokens []string) *AuthMiddleware {
 	m := make(map[string]bool)
 	for _, t := range tokens {
 		m[t] = true
-		fmt.Printf("token : %v \n", t)
 	}
 
 	return &AuthMiddleware{tokens: m}

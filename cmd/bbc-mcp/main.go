@@ -16,6 +16,7 @@ import (
 	"bbc-mcp/internal/config"
 	"bbc-mcp/internal/infrastructure"
 	"bbc-mcp/internal/k8s"
+	"bbc-mcp/internal/prompt"
 	"bbc-mcp/internal/ratelimit"
 	"bbc-mcp/internal/tool"
 )
@@ -30,9 +31,14 @@ func NewBBCMCPServer(deps *tool.Dependencies, hooks *server.Hooks) *BBCMCPServer
 		"bbc-mcp",
 		"1.0.0",
 		server.WithToolCapabilities(true),
+		server.WithPromptCapabilities(true),
 		server.WithHooks(hooks),
 	)
 	tool.RegisterAll(s, deps)
+
+	guidePrompt, guideHandler := prompt.NewBBCGuidePrompt()
+	s.AddPrompt(guidePrompt, guideHandler)
+
 	return &BBCMCPServer{server: s, deps: deps}
 }
 

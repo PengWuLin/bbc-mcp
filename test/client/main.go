@@ -66,24 +66,32 @@ func main() {
 	}
 	fmt.Println()
 
+	fmt.Println("=== 测试 ListPrompts ===")
+	testListPrompts(ctx, cli)
+	fmt.Println()
+
+	fmt.Println("=== 测试 GetPrompt (bbc-guide) ===")
+	testGetBBCGuide(ctx, cli)
+	fmt.Println()
+
 	fmt.Println("=== 测试 gateway_status ===")
 	testGatewayStatus(ctx, cli)
 	fmt.Println()
 
 	fmt.Println("=== 测试 device_list ===")
-	//testDeviceList(ctx, cli, "56626662", "", 0)
-	//testDeviceList(ctx, cli, "56626662", "Connect", 0)
+	testDeviceList(ctx, cli, "56626662", "", 0)
+	testDeviceList(ctx, cli, "56626662", "Connect", 0)
 	fmt.Println()
 
 	fmt.Println("=== 测试 device_status ===")
-	//testDeviceStatus(ctx, cli, 223166)
+	testDeviceStatus(ctx, cli, 223166)
 	fmt.Println()
 
 	if os.Getenv("BBC_MCP_TEST_RATELIMIT") == "1" {
-		//testRateLimit(serverURL, token)
+		testRateLimit(serverURL, token)
 	}
 	if os.Getenv("BBC_MCP_TEST_AUTH") == "1" {
-		//testAuth(serverURL, token)
+		testAuth(serverURL, token)
 	}
 }
 
@@ -186,6 +194,44 @@ func testAuth(serverURL, token string) {
 	}
 	defer cli.Close()
 	fmt.Printf("  连接成功\n")
+}
+
+func testListPrompts(ctx context.Context, cli *client.Client) {
+	result, err := cli.ListPrompts(ctx, mcp.ListPromptsRequest{})
+	if err != nil {
+		log.Printf("ListPrompts 调用失败: %v", err)
+		return
+	}
+	fmt.Printf("可用 Prompts (%d):\n", len(result.Prompts))
+	for _, p := range result.Prompts {
+		fmt.Printf("- %s: %s\n", p.Name, p.Description)
+	}
+}
+
+func testGetBBCGuide(ctx context.Context, cli *client.Client) {
+	result, err := cli.GetPrompt(ctx, mcp.GetPromptRequest{
+		Params: mcp.GetPromptParams{
+			Name: "bbc-guide",
+		},
+	})
+	if err != nil {
+		log.Printf("GetPrompt(bbc-guide) 调用失败: %v", err)
+		return
+	}
+	fmt.Printf("Description: %s\n", result.Description)
+	fmt.Printf("Messages: %d\n", len(result.Messages))
+	for _, msg := range result.Messages {
+		fmt.Printf("  Role: %s\n", msg.Role)
+		switch c := msg.Content.(type) {
+		case mcp.TextContent:
+			// 只打印前 500 字符作为预览
+			text := c.Text
+			if len(text) > 500 {
+				text = text[:500] + "...(truncated)"
+			}
+			fmt.Printf("  Content preview: %s\n", text)
+		}
+	}
 }
 
 func testGatewayStatus(ctx context.Context, cli *client.Client) {

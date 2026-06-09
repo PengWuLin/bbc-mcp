@@ -18,7 +18,8 @@
       "Bash(go test *)",
       "Bash(export BBC_MCP_KEY=\"bbc-mcp-master-key-2026\")",
       "Bash(bin/encrypt-tool.exe encrypt *)",
-      "Bash(go get *)"
+      "Bash(go get *)",
+      "Bash(git *)"
     ]
   }
 }
