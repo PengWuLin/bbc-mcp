@@ -28,6 +28,11 @@ build-linux:
 run: build
 	BBC_MCP_CONFIG=$(CONFIG) $(OUTDIR)/$(APP_NAME)
 
+# ---- encrypt-tool ----
+build-tool:
+	@mkdir -p $(OUTDIR)
+	$(GO) build -ldflags="$(LDFLAGS)" -o $(OUTDIR)/encrypt-tool ./cmd/encrypt-tool/
+
 # ---- test ----
 
 test:

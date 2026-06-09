@@ -14,7 +14,10 @@
       "Bash(curl -s -N http://192.168.31.67:9000/sse)",
       "Bash(./client.exe *)",
       "Bash(go vet *)",
-      "Bash(make build *)"
+      "Bash(make build *)",
+      "Bash(go test *)",
+      "Bash(export BBC_MCP_KEY=\"bbc-mcp-master-key-2026\")",
+      "Bash(bin/encrypt-tool.exe encrypt *)"
     ]
   }
 }

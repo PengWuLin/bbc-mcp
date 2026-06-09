@@ -8,7 +8,7 @@ Database:
   Port: 3306
   Name: scloudb
   User: root
-  Password: ".pwl123456"
+  Password: "dJm5tI8fqUsMJ1332LQep1YMyWVTtCZ/o632cBxpEPTyu9L20+8="
   MaxOpenConns: 10
   MaxIdleConns: 5
 

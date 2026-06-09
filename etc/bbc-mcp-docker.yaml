@@ -8,14 +8,14 @@ Database:
   Port: 3306
   Name: scloudb
   User: root
-  Password: "YkRPTXf6EIChMOvz"
+  Password: "IOsQvSVDaOr3X3n078siyEAw07nGimsNmASHYaJzbf4K6JyzUasoJhy90rA="
   MaxOpenConns: 10
   MaxIdleConns: 5
 
 Redis:
   Host: 10.22.132.24
   Port: 6379
-  Password: "ZusM6vrjqKV6tOlF@"
+  Password: "09iuFc9KbCeVytjKrsDM3zy8HTp/L3mYBQOIQhKYCfCetPtEWrkNWkbvmPKq"
   DB: 0
 
 BbcTool:

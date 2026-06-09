@@ -1,10 +1,13 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"gopkg.in/yaml.v3"
+
+	"bbc-mcp/internal/crypto"
 )
 
 type Config struct {
@@ -58,5 +61,29 @@ func Load(path string) (*Config, error) {
 		log.Printf("config: 解析配置失败: %v", err)
 		return nil, err
 	}
+
+	if err := cfg.decryptPasswords(); err != nil {
+		log.Printf("config: 解密密码失败: %v", err)
+		return nil, err
+	}
+
 	return cfg, nil
+}
+
+func (c *Config) decryptPasswords() error {
+	if c.Database.Password != "" {
+		pw, err := crypto.DecryptIfNeeded(c.Database.Password)
+		if err != nil {
+			return fmt.Errorf("解密 Database.Password 失败: %w", err)
+		}
+		c.Database.Password = pw
+	}
+	if c.Redis.Password != "" {
+		pw, err := crypto.DecryptIfNeeded(c.Redis.Password)
+		if err != nil {
+			return fmt.Errorf("解密 Redis.Password 失败: %w", err)
+		}
+		c.Redis.Password = pw
+	}
+	return nil
 }

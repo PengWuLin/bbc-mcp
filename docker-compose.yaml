@@ -12,3 +12,4 @@ services:
       - /root/code/tools/:/app/tools
     environment:
       BBC_MCP_CONFIG: /app/etc/bbc-mcp.yaml
+      BBC_MCP_KEY: "bspYWis07Q7E1YXlxZOX4Pdal08uNaHPps52Ydeo"
