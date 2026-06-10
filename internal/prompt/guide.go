@@ -126,7 +126,7 @@ device_status Tool 返回的 realtime 字段来自 Redis，字段含义如下：
 
 ## 四、Tool 使用说明
 
-### 4.1 gateway_status — 查询设备连接数
+### 4.1 datacenter_status — 查询数据中心设备连接数
 
 功能：查询 minibbc 数据中心网关各 Pod 的 ESTABLISHED 连接数和设备数。
 

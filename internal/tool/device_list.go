@@ -17,7 +17,7 @@ func newDeviceList(deps *Dependencies) ToolDefinition {
 
 	return ToolDefinition{
 		Tool: mcp.NewTool("device_list",
-			mcp.WithDescription("查询某个租户的设备列表，支持按名称筛选和分页"),
+			mcp.WithDescription("按租户 ID 查询设备列表，支持设备名称模糊搜索和分页。\n\n参数：\n  - ccode (string, 必填): 租户 ID（公司代码），不能为空\n  - name (string, 可选): 设备名称，支持模糊匹配（LIKE %name%）\n  - offset (integer, 必填): 分页偏移量，>=0，负数自动置 0\n\n返回值：\n  {\"total\":true, \"limit\":20, \"offset\":0, \"devices\":[{\"id\":260860,\"name\":\"sz1_af\",\"zp_id\":400,\"status\":3}]}\n  - limit: 固定每页 20 条，不可覆盖\n  - zp_id: 接入服务器 ID（200=奥飞, 400=深圳四区, 800=深圳一区）\n  - status: 设备状态码（0=未激活, 1=已启用, 2=离线, 3=在线, 4=告警, 5=停用）\n  - type 字段不返回，查设备类型请用 device_status\n\n注意事项：\n  - 超时 5s\n  - 租户无设备时返回空数组 []"),
 			mcp.WithString("ccode",
 				mcp.Required(),
 				mcp.Description("租户ID（公司代码）"),

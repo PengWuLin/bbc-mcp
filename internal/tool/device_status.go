@@ -17,7 +17,7 @@ func newDeviceStatus(deps *Dependencies) ToolDefinition {
 
 	return ToolDefinition{
 		Tool: mcp.NewTool("device_status",
-			mcp.WithDescription("查询某个设备的详细信息和实时连接状态"),
+			mcp.WithDescription("按设备 ID 查询设备完整信息（MySQL）和实时运行状态（Redis）。\n\n参数：\n  - id (integer, 必填): 设备 ID\n\n返回值：\n  {\"device\": {...35个字段}, \"realtime\": {\"cpu\":\"98\",\"mem\":\"41\",...}}\n  - device.type: 设备类型（1=ABOS,2=AC,3=AF,4=MIG,5=WOC,6=SG,7=EDR,8=CM,9=CG）\n  - device.status: 持久化状态码（0=未激活,1=已启用,2=离线,3=在线,4=告警,5=停用）\n  - device.device_belong: 设备归属（0=旧设备,1=安服,2=XDR,3=云图）\n  - device.zp_id: 接入服务器 ID（200=奥飞,400=深圳四区,800=深圳一区）\n  - device.pwd: 永远返回 \"***\"，密码已脱敏\n  - realtime: 实时采集数据（CPU/内存/磁盘/会话数/在线用户等 18 个字段），可能为 null（Redis 不可用时）\n  - realtime.status: 实时状态码，优先于 device.status 使用\n\n注意事项：\n  - MySQL 超时 5s，Redis 超时 3s\n  - 设备不存在返回错误\"设备不存在\"\n  - realtime 为 null 时不视为错误"),
 			mcp.WithInteger("id",
 				mcp.Required(),
 				mcp.Description("设备ID"),

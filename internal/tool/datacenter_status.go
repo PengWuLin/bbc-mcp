@@ -13,10 +13,10 @@ import (
 	"bbc-mcp/internal/gateway"
 )
 
-func newGatewayStatus(deps *Dependencies) ToolDefinition {
+func newDatacenterStatus(deps *Dependencies) ToolDefinition {
 	return ToolDefinition{
-		Tool: mcp.NewTool("gateway_status",
-			mcp.WithDescription("查询当前 minibbc 数据中心设备连接数"),
+		Tool: mcp.NewTool("datacenter_status",
+			mcp.WithDescription("查询 minibbc 数据中心各 K8s 集群的设备连接状态。返回每个集群的 Pod 连接数（TCP ESTABLISHED）和设备数（connections/3）。\n\n参数：\n  - cluster (string, 可选): K8s 集群名称，不填则查询所有已配置集群\n\n返回值（JSON 数组）：\n  [{\"cluster\":\"bbc-shenzhen4\", \"pods\":[{\"pod_name\":\"cloudbbc-gateway-0\",\"status\":\"Running\",\"connections\":60,\"devices\":20}]}]\n  - connections: TCP ESTABLISHED 连接数\n  - devices: connections / 3（每设备维持 3 个连接）\n  - 若 Pod 非 Running 状态，error 字段会有说明；若指定 cluster 不存在，返回错误\n\n注意事项：\n  - 查询超时 30s\n  - 单次请求串行查询所有集群"),
 			mcp.WithString("cluster",
 				mcp.Description("K8s 集群名称（可选，不填则查询所有集群）"),
 			),
@@ -25,9 +25,9 @@ func newGatewayStatus(deps *Dependencies) ToolDefinition {
 			cluster := getStringArg(req, "cluster")
 
 			if deps.Config.Gateway.Mode == "native" {
-				return gatewayStatusNative(ctx, deps, cluster)
+				return datacenterStatusNative(ctx, deps, cluster)
 			}
-			return gatewayStatusCLI(ctx, deps)
+			return datacenterStatusCLI(ctx, deps)
 		},
 	}
 }
@@ -41,13 +41,12 @@ func getStringArg(req mcp.CallToolRequest, key string) string {
 	return v
 }
 
-func gatewayStatusNative(ctx context.Context, deps *Dependencies, cluster string) (*mcp.CallToolResult, error) {
+func datacenterStatusNative(ctx context.Context, deps *Dependencies, cluster string) (*mcp.CallToolResult, error) {
 	allClients := deps.K8sClients
 	if len(allClients) == 0 {
 		return mcp.NewToolResultError("未配置 K8s 集群"), nil
 	}
 
-	// Determine which clusters to query
 	targetNames := make([]string, 0, len(allClients))
 	if cluster != "" {
 		if _, ok := allClients[cluster]; !ok {
@@ -75,7 +74,7 @@ func gatewayStatusNative(ctx context.Context, deps *Dependencies, cluster string
 	return mcp.NewToolResultText(string(output)), nil
 }
 
-func gatewayStatusCLI(ctx context.Context, deps *Dependencies) (*mcp.CallToolResult, error) {
+func datacenterStatusCLI(ctx context.Context, deps *Dependencies) (*mcp.CallToolResult, error) {
 	toolPath := deps.Config.BbcTool.Path
 	timeout := time.Duration(deps.Config.BbcTool.Timeout) * time.Second
 
@@ -85,7 +84,7 @@ func gatewayStatusCLI(ctx context.Context, deps *Dependencies) (*mcp.CallToolRes
 	cmd := exec.CommandContext(cmdCtx, toolPath, "status", "gateway")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("gateway_status: 执行命令失败，输出：%s，错误： %v", output, err)
+		log.Printf("datacenter_status: 执行命令失败，输出：%s，错误： %v", output, err)
 		return mcp.NewToolResultText(string(output)), nil
 	}
 

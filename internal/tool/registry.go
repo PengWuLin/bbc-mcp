@@ -27,7 +27,7 @@ type Dependencies struct {
 
 func RegisterAll(s *server.MCPServer, deps *Dependencies) {
 	definitions := []ToolDefinition{
-		newGatewayStatus(deps),
+		newDatacenterStatus(deps),
 		newDeviceList(deps),
 		newDeviceStatus(deps),
 		newSMSPackageList(deps),

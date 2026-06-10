@@ -74,8 +74,8 @@ func main() {
 	testGetBBCGuide(ctx, cli)
 	fmt.Println()
 
-	fmt.Println("=== 测试 gateway_status ===")
-	testGatewayStatus(ctx, cli)
+	fmt.Println("=== 测试 datacenter_status ===")
+	testDatacenterStatus(ctx, cli)
 	fmt.Println()
 
 	fmt.Println("=== 测试 device_list ===")
@@ -132,7 +132,7 @@ func testRateLimit(serverURL, token string) {
 
 			_, err = cli.CallTool(context.Background(), mcp.CallToolRequest{
 				Params: mcp.CallToolParams{
-					Name: "gateway_status",
+					Name: "datacenter_status",
 				},
 			})
 			if err != nil {
@@ -238,14 +238,14 @@ func testGetBBCGuide(ctx context.Context, cli *client.Client) {
 	}
 }
 
-func testGatewayStatus(ctx context.Context, cli *client.Client) {
+func testDatacenterStatus(ctx context.Context, cli *client.Client) {
 	result, err := cli.CallTool(ctx, mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
-			Name: "gateway_status",
+			Name: "datacenter_status",
 		},
 	})
 	if err != nil {
-		log.Printf("gateway_status 调用失败: %v", err)
+		log.Printf("datacenter_status 调用失败: %v", err)
 		return
 	}
 	printResult(result)
