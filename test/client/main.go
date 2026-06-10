@@ -87,6 +87,10 @@ func main() {
 	testDeviceStatus(ctx, cli, 223166)
 	fmt.Println()
 
+	fmt.Println("=== 测试 sms_package_list ===")
+	testSMSPackageList(ctx, cli, 26912728)
+	fmt.Println()
+
 	if os.Getenv("BBC_MCP_TEST_RATELIMIT") == "1" {
 		testRateLimit(serverURL, token)
 	}
@@ -296,6 +300,24 @@ func printResult(result *mcp.CallToolResult) {
 			fmt.Println(c.Text)
 		}
 	}
+}
+
+func testSMSPackageList(ctx context.Context, cli *client.Client, corpID int) {
+	result, err := cli.CallTool(ctx, mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Name: "sms_package_list",
+			Arguments: map[string]any{
+				"corp_id": float64(corpID),
+			},
+		},
+	})
+	if err != nil {
+		log.Printf("sms_package_list 调用失败 (corp_id=%d): %v", corpID, err)
+		return
+	}
+
+	fmt.Printf("corp_id=%d:\n", corpID)
+	printPrettyJSON(result)
 }
 
 func printPrettyJSON(result *mcp.CallToolResult) {

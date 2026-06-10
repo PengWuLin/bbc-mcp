@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -109,8 +110,20 @@ func main() {
 	}
 	defer redisClient.Close()
 
+	var smsDB *sql.DB
+	if cfg.SMSDatabase.Host != "" {
+		smsDB, err = infrastructure.NewMySQLDataSource(&cfg.SMSDatabase)
+		if err != nil {
+			log.Fatalf("初始化短信云数据库失败: %v", err)
+		}
+		defer smsDB.Close()
+		log.Printf("短信云数据库连接成功: %s:%d/%s",
+			cfg.SMSDatabase.Host, cfg.SMSDatabase.Port, cfg.SMSDatabase.Name)
+	}
+
 	deps := &tool.Dependencies{
 		DB:         db,
+		SMSDB:      smsDB,
 		Redis:      redisClient,
 		Config:     cfg,
 		K8sClients: k8sClients,

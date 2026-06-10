@@ -12,6 +12,15 @@ Database:
   MaxOpenConns: 10
   MaxIdleConns: 5
 
+SMSDatabase:
+  Host: 10.200.198.30
+  Port: 3306
+  Name: csmsdb
+  User: root
+  Password: "rDC6+hcF2GanSM43427RjZIgMz5MMY/99o2TvXvu7ZxcifAenZObnWGWjPF7htBb"
+  MaxOpenConns: 5
+  MaxIdleConns: 2
+
 Redis:
   Host: 10.22.132.24
   Port: 6379

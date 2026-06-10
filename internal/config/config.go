@@ -11,12 +11,13 @@ import (
 )
 
 type Config struct {
-	Server      ServerConfig              `yaml:"Server"`
-	Database    DatabaseConfig            `yaml:"Database"`
-	Redis       RedisConfig               `yaml:"Redis"`
-	BbcTool     BbcToolConfig             `yaml:"BbcTool"`
-	Auth        AuthConfig                `yaml:"Auth"`
-	Gateway     GatewayConfig             `yaml:"Gateway"`
+	Server      ServerConfig                `yaml:"Server"`
+	Database    DatabaseConfig              `yaml:"Database"`
+	SMSDatabase DatabaseConfig              `yaml:"SMSDatabase"`
+	Redis       RedisConfig                 `yaml:"Redis"`
+	BbcTool     BbcToolConfig               `yaml:"BbcTool"`
+	Auth        AuthConfig                  `yaml:"Auth"`
+	Gateway     GatewayConfig               `yaml:"Gateway"`
 	K8sClusters map[string]K8sClusterConfig `yaml:"K8sClusters"`
 }
 
@@ -135,6 +136,14 @@ func (c *Config) decryptSecrets() error {
 			}
 			c.Auth.Tokens[i] = decrypted
 		}
+	}
+
+	if c.SMSDatabase.Password != "" {
+		pw, err := crypto.DecryptIfNeeded(c.SMSDatabase.Password)
+		if err != nil {
+			return fmt.Errorf("解密 SMSDatabase.Password 失败: %w", err)
+		}
+		c.SMSDatabase.Password = pw
 	}
 
 	for name, cluster := range c.K8sClusters {
