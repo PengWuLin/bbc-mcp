@@ -15,6 +15,7 @@ type Config struct {
 	Database    DatabaseConfig              `yaml:"Database"`
 	SMSDatabase DatabaseConfig              `yaml:"SMSDatabase"`
 	Redis       RedisConfig                 `yaml:"Redis"`
+	SMSRedis    RedisConfig                 `yaml:"SMSRedis"`
 	BbcTool     BbcToolConfig               `yaml:"BbcTool"`
 	Auth        AuthConfig                  `yaml:"Auth"`
 	Gateway     GatewayConfig               `yaml:"Gateway"`
@@ -136,6 +137,14 @@ func (c *Config) decryptSecrets() error {
 			}
 			c.Auth.Tokens[i] = decrypted
 		}
+	}
+
+	if c.SMSRedis.Password != "" {
+		pw, err := crypto.DecryptIfNeeded(c.SMSRedis.Password)
+		if err != nil {
+			return fmt.Errorf("解密 SMSRedis.Password 失败: %w", err)
+		}
+		c.SMSRedis.Password = pw
 	}
 
 	if c.SMSDatabase.Password != "" {

@@ -21,6 +21,7 @@ type Dependencies struct {
 	DB         *sql.DB
 	SMSDB      *sql.DB
 	Redis      *redis.Client
+	SMSRedis   *redis.Client
 	Config     *config.Config
 	K8sClients map[string]*k8s.Client
 }
@@ -31,6 +32,7 @@ func RegisterAll(s *server.MCPServer, deps *Dependencies) {
 		newDeviceList(deps),
 		newDeviceStatus(deps),
 		newSMSPackageList(deps),
+			newSMSPackageRenew(deps),
 	}
 	for _, def := range definitions {
 		s.AddTool(def.Tool, def.Handler)

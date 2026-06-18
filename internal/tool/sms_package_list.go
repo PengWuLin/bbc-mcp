@@ -32,7 +32,7 @@ func newSMSPackageList(deps *Dependencies) ToolDefinition {
 			}
 			corpID := int(idFloat)
 
-			repo := repository.NewSMSPackageRepository(deps.SMSDB)
+			repo := repository.NewSMSPackageRepository(deps.SMSDB, nil)
 			packages, err := repo.QueryByCorpID(ctx, corpID)
 			if err != nil {
 				log.Printf("sms_package_list: 查询失败: %v", err)

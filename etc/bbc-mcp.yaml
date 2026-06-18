@@ -21,6 +21,12 @@ SMSDatabase:
  MaxOpenConns: 5
  MaxIdleConns: 2
 
+SMSRedis:
+  Host: 192.168.31.200
+  Port: 6379
+  Password: ""
+  DB: 0
+
 Redis:
   Host: 192.168.31.200
   Port: 6379

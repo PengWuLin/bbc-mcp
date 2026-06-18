@@ -12,6 +12,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/redis/go-redis/v9"
 
 	"bbc-mcp/internal/auth"
 	"bbc-mcp/internal/config"
@@ -110,6 +111,16 @@ func main() {
 	}
 	defer redisClient.Close()
 
+	var smsRedis *redis.Client
+	if cfg.SMSRedis.Host != "" {
+		smsRedis, err = infrastructure.NewRedisClient(&cfg.SMSRedis)
+		if err != nil {
+			log.Fatalf("初始化短信云 Redis 失败: %v", err)
+		}
+		defer smsRedis.Close()
+		log.Printf("短信云 Redis 连接成功: %s:%d", cfg.SMSRedis.Host, cfg.SMSRedis.Port)
+	}
+
 	var smsDB *sql.DB
 	if cfg.SMSDatabase.Host != "" {
 		smsDB, err = infrastructure.NewMySQLDataSource(&cfg.SMSDatabase)
@@ -125,6 +136,7 @@ func main() {
 		DB:         db,
 		SMSDB:      smsDB,
 		Redis:      redisClient,
+		SMSRedis:   smsRedis,
 		Config:     cfg,
 		K8sClients: k8sClients,
 	}
