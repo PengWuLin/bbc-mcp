@@ -70,9 +70,12 @@ func (r *SMSPackageRepository) RenewExpireTime(ctx context.Context, id int, ccod
 		log.Printf("repository: 续期套餐失败(id=%d): %v", id, err)
 		return fmt.Errorf("renew sms package: %w", err)
 	}
-	rowsAffected, _ := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("需求套餐失败: %v", err)
+	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("套餐不存在: id=%d", id)
+		log.Printf("数据库无更新")
 	}
 
 	if r.redis != nil {
@@ -80,6 +83,7 @@ func (r *SMSPackageRepository) RenewExpireTime(ctx context.Context, id int, ccod
 		defer cancel()
 
 		key := fmt.Sprintf("csms:corp:%s:package:availnum", ccode)
+		log.Printf("repository: Redis DEL key=%s", key)
 		if err := r.redis.Del(ctxRedis, key).Err(); err != nil {
 			log.Printf("repository: 删除 Redis 缓存失败(key=%s): %v", key, err)
 		}

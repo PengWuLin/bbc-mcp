@@ -91,6 +91,10 @@ func main() {
 	testSMSPackageList(ctx, cli, 26912728)
 	fmt.Println()
 
+	fmt.Println("=== 测试 sms_package_renew ===")
+	testSMSPackageRenew(ctx, cli)
+	fmt.Println()
+
 	if os.Getenv("BBC_MCP_TEST_RATELIMIT") == "1" {
 		testRateLimit(serverURL, token)
 	}
@@ -300,6 +304,33 @@ func printResult(result *mcp.CallToolResult) {
 			fmt.Println(c.Text)
 		}
 	}
+}
+
+func testSMSPackageRenew(ctx context.Context, cli *client.Client) {
+	pkgID := 1292
+	ccode := "26912728"
+
+	fmt.Printf("续期套餐 id=%d ccode=%s ...\n", pkgID, ccode)
+	result, err := cli.CallTool(ctx, mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Name: "sms_package_renew",
+			Arguments: map[string]any{
+				"id":    float64(pkgID),
+				"ccode": ccode,
+			},
+		},
+	})
+	if err != nil {
+		log.Printf("smSPackage_renew 调用失败: %v", err)
+		return
+	}
+	if result.IsError {
+		fmt.Printf("续期失败: ")
+		printResult(result)
+		return
+	}
+	fmt.Printf("续期成功: ")
+	printPrettyJSON(result)
 }
 
 func testSMSPackageList(ctx context.Context, cli *client.Client, corpID int) {

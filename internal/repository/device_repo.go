@@ -107,6 +107,7 @@ func (r *DeviceRepository) GetDeviceBasicInfo(ctx context.Context, id int) (map[
 	defer cancel()
 
 	key := fmt.Sprintf("device:%d:status:basic", id)
+	log.Printf("repository: Redis HGETALL key=%s", key)
 	result, err := r.redis.HGetAll(ctx, key).Result()
 	if err != nil {
 		log.Printf("repository: Redis HGETALL %s 失败: %v", key, err)
@@ -120,6 +121,7 @@ func (r *DeviceRepository) GetDeviceOnlineStatus(ctx context.Context, id int) (m
 	defer cancel()
 
 	key := fmt.Sprintf("device_%d", id)
+	log.Printf("repository: Redis HGETALL key=%s", key)
 	result, err := r.redis.HGetAll(ctx, key).Result()
 	if err != nil {
 		log.Printf("repository: Redis HGETALL %s 失败: %v", key, err)
